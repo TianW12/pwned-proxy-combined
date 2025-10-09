@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       'http://backend:8000'
     ).replace(/\/$/, '');
     const response = await fetch(
-      `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(email)}?includeUnverified=true`,
+      `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(email)}?includeUnverified=true&truncateResponse=false`,
       {
         method: 'GET',
         headers: {

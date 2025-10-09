@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       process.env.HIBP_PROXY_INTERNAL_URL ||
       'http://backend:8000'
     ).replace(/\/$/, '');
-    const apiUrl = `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(email)}?includeUnverified=true`;
+    const apiUrl = `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(email)}?includeUnverified=true&truncateResponse=false`;
     const proxyKey = process.env.HIBP_PROXY_API_KEY || '';
     if (!proxyKey) {
       return NextResponse.json(
