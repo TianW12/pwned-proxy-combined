@@ -13,12 +13,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const proxyKey =
+      process.env.HIBP_PROXY_API_KEY ||
+      process.env.HIBP_API_KEY ||
+      '';
+    if (!proxyKey) {
+      return NextResponse.json(
+        { error: 'HIBP_PROXY_API_KEY is not configured on the frontend server.' },
+        { status: 500 }
+      );
+    }
+
     // Server‑side call to your Django API – no CORS issues here
-  // Prefer the internal backend hostname when running inside Docker.
-  const baseUrl = (
-    process.env.HIBP_PROXY_INTERNAL_URL ||
-    'http://backend:8000'
-  ).replace(/\/$/, '');
+    // Prefer the internal backend hostname when running inside Docker.
+    const baseUrl = (
+      process.env.HIBP_PROXY_INTERNAL_URL ||
+      'http://backend:8000'
+    ).replace(/\/$/, '');
     const response = await fetch(
       `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(email)}?includeUnverified=true`,
       {
@@ -26,7 +37,7 @@ export async function POST(request: NextRequest) {
         headers: {
           accept: 'application/json',
           Authorization: authHeader,
-          'X-API-Key': process.env.HIBP_API_KEY ?? '',
+          'X-API-Key': proxyKey,
         },
       }
     );

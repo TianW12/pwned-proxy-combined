@@ -47,16 +47,12 @@ export default function HomePage() {
     setLoading(true);
 
     try {
-      const baseUrl = (process.env.NEXT_PUBLIC_HIBP_PROXY_URL ||
-        "http://localhost:8000").replace(/\/$/, "");
-
-      const apiUrl = `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(
-        trimmedEmail
-      )}?truncateResponse=false&includeUnverified=true`;
-
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: { accept: "application/json" },
+      const response = await fetch("/api/public-breach-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       if (response.status === 404) {
@@ -73,7 +69,16 @@ export default function HomePage() {
 
       const text = await response.text();
       if (!response.ok) {
-        setError(`Error: ${response.status} - ${response.statusText}`);
+        try {
+          const parsed = JSON.parse(text);
+          setError(
+            `Error: ${response.status} - ${
+              parsed.error || response.statusText
+            }`
+          );
+        } catch {
+          setError(`Error: ${response.status} - ${response.statusText}`);
+        }
         return;
       }
 

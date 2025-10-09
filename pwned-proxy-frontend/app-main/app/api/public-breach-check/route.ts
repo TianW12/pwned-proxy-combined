@@ -5,16 +5,24 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json();
 
     // Server-side call to the Django API without requiring Authorization
-  // Prefer the internal backend hostname when running inside Docker.
-  const baseUrl = (
-    process.env.HIBP_PROXY_INTERNAL_URL ||
-    'http://backend:8000'
-  ).replace(/\/$/, '');
+    // Prefer the internal backend hostname when running inside Docker.
+    const baseUrl = (
+      process.env.HIBP_PROXY_INTERNAL_URL ||
+      'http://backend:8000'
+    ).replace(/\/$/, '');
     const apiUrl = `${baseUrl}/api/v3/breachedaccount/${encodeURIComponent(email)}?includeUnverified=true`;
+    const proxyKey = process.env.HIBP_PROXY_API_KEY || '';
+    if (!proxyKey) {
+      return NextResponse.json(
+        { error: 'HIBP_PROXY_API_KEY is not configured on the frontend server.' },
+        { status: 500 }
+      );
+    }
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         accept: 'application/json',
+        'X-API-Key': proxyKey,
       },
     });
 

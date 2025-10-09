@@ -9,6 +9,18 @@ if you wish to use a different API location. By default it points to
 read by the start page and the header link so it also works when deployed with
 Coolify.
 
+### Proxy API Key
+
+Run the backend “Seed Groups” action and copy the raw key for the *Master Group*
+into `.env.local` as:
+
+```bash
+HIBP_PROXY_API_KEY=<master_key_from_seed>
+```
+
+The `/email` page and other server-side routes forward this key as `X-API-Key`
+when talking to the proxy. Without it the page will return `403 Forbidden`.
+
 ### Google Analytics
 
 If you want to track visits with Google Analytics you can provide your

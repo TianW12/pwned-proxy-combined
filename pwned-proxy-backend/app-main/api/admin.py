@@ -182,6 +182,32 @@ SEED_DATA = [
   {"domain": "cbs.dk", "group": "Copenhagen Business School"}
 ]
 
+MASTER_GROUP_NAME = "Master Group"
+MASTER_KEY_NAME = "Master Key"
+
+
+def seed_master_group_key():
+    """
+    Create or replace the master group/key with access to every domain.
+    Returns (api_key_obj, raw_key, [domain_names]).
+    """
+    master_group, _ = Group.objects.get_or_create(name=MASTER_GROUP_NAME)
+    APIKey.objects.filter(group=master_group).delete()
+
+    api_key_obj, raw_key = APIKey.create_api_key(
+        group=master_group,
+        name=MASTER_KEY_NAME,
+        description="Seeded master key with full domain access",
+    )
+
+    all_domains = list(Domain.objects.all())
+    if all_domains:
+        api_key_obj.domains.add(*all_domains)
+
+    domain_names = [domain.name for domain in all_domains]
+    return api_key_obj, raw_key, domain_names
+
+
 @admin.register(Group)
 class CustomGroupAdmin(GroupAdmin):
     """
@@ -254,6 +280,20 @@ class CustomGroupAdmin(GroupAdmin):
         result_list = [
             {"group_name": name, "api_keys": keys} for name, keys in grouped.items()
         ]
+
+        # Add the master key that has access to every domain
+        _, master_raw_key, master_domains = seed_master_group_key()
+        result_list.append(
+            {
+                "group_name": MASTER_GROUP_NAME,
+                "api_keys": [
+                    {
+                        "raw_key": master_raw_key,
+                        "domains": master_domains,
+                    }
+                ],
+            }
+        )
 
         # 4) Return a JSON response (as a downloadable file)
         import json

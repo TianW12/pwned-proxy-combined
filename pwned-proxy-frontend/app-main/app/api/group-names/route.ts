@@ -9,7 +9,17 @@ export async function GET() {
     process.env.HIBP_PROXY_INTERNAL_URL ||
     'http://backend:8000'
   ).replace(/\/$/, '');
-  const apiKey = process.env.HIBP_API_KEY ?? '';
+  const apiKey =
+    process.env.HIBP_PROXY_API_KEY ||
+    process.env.HIBP_API_KEY ||
+    '';
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'HIBP_PROXY_API_KEY is not configured on the frontend server.' },
+      { status: 500 }
+    );
+  }
 
   console.log('[group-names] using baseUrl:', baseUrl);
 
