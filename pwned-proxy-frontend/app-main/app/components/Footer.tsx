@@ -2,8 +2,13 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Github } from "lucide-react";
+
+type GitInfo = {
+  branch?: string;
+  commit?: string;
+};
 
 export default function Footer() {
   // Keep track of user’s theme choice. Default is "auto".
@@ -48,6 +53,47 @@ export default function Footer() {
       localStorage.setItem("theme", theme);
     }
   }, [theme]);
+
+  const [gitInfo, setGitInfo] = useState<GitInfo | null>(null);
+  const [gitError, setGitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchGitInfo = async () => {
+      try {
+        const response = await fetch("/api/git-info");
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = (await response.json()) as GitInfo & { error?: string };
+        if (data.error) {
+          setGitError(data.error);
+          return;
+        }
+        setGitInfo(data);
+      } catch (error) {
+        setGitError("Unable to load git information");
+      }
+    };
+
+    fetchGitInfo();
+  }, []);
+
+  const versionLabel = useMemo(() => {
+    if (!gitInfo) {
+      return null;
+    }
+
+    const parts = [
+      gitInfo.branch ?? null,
+      gitInfo.commit ? `(${gitInfo.commit})` : null,
+    ].filter((value): value is string => Boolean(value));
+
+    if (parts.length === 0) {
+      return null;
+    }
+
+    return parts.join(" ");
+  }, [gitInfo]);
 
   return (
     <footer
@@ -100,6 +146,13 @@ export default function Footer() {
           <Github className="w-4 h-4 mr-1" />
           GitHub
         </a>
+        {versionLabel ? (
+          <span className="font-mono">{versionLabel}</span>
+        ) : gitError ? (
+          <span className="text-xs text-tnLight-muted dark:text-tnStorm-muted">
+            {gitError}
+          </span>
+        ) : null}
         <span>Get involved on GitHub!</span>
       </div>
     </footer>
