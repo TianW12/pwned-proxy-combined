@@ -9,7 +9,8 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from urllib.parse import urlencode
 
-from .models import APIKey, Domain, EndpointLog
+from .models import APIKey, EndpointLog
+from .permissions import HasValidAPIKey
 from .utils import get_hibp_key
 
 
@@ -50,6 +51,8 @@ def make_response(resp: requests.Response) -> Response:
 
 class LoggedAPIView(APIView):
     """API view that records basic analytics for each request."""
+
+    permission_classes = [HasValidAPIKey]
 
     def finalize_response(self, request, response, *args, **kwargs):
         resp = super().finalize_response(request, response, *args, **kwargs)
@@ -93,14 +96,11 @@ class BreachedDomainProxyView(LoggedAPIView):
                 name="hibp-api-key",
                 in_=openapi.IN_HEADER,
                 type=openapi.TYPE_STRING,
-                required=False,
+                required=True,
             ),
         ],
     )
     def get(self, request, domain: str = None):
-        if not isinstance(request.auth, APIKey):
-            return Response({"detail": "No valid API key provided."}, status=401)
-
         api_key_obj = request.auth
         if not api_key_obj.domains.filter(name=domain).exists():
             raise PermissionDenied(f"API key not authorized for domain '{domain}'")
@@ -142,6 +142,12 @@ class BreachedAccountProxyView(LoggedAPIView):
                 required=False,
                 description="Include unverified breaches",
             ),
+            openapi.Parameter(
+                name="hibp-api-key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
         ],
         responses={200: "Success", 404: "No record"},
     )
@@ -153,10 +159,8 @@ class BreachedAccountProxyView(LoggedAPIView):
             account.encode("ascii")  # simple validation
         except UnicodeEncodeError:
             return Response({"detail": "Invalid email format."}, status=400)
-        
 
-
-     #  Forward only the allowed query params
+        # Forward only the allowed query params
         query = {}
         for param in ["truncateResponse", "includeUnverified"]:
             if param in request.query_params:
@@ -166,7 +170,6 @@ class BreachedAccountProxyView(LoggedAPIView):
         if query:
             path += f"?{urlencode(query)}"
 
-        print("DEBUG final path to HIBP:", path)  # Optional: Debug log
         resp = hibp_get(path)
         return make_response(resp)
     
@@ -205,9 +208,6 @@ class PasteAccountProxyView(LoggedAPIView):
     )
     def get(self, request, account: str = None):
         api_key_obj = request.auth
-        if not api_key_obj:
-            return Response({"detail": "No valid API key."}, status=401)
-
         if not account:
             return Response({"detail": "Missing 'email' parameter."}, status=400)
 
@@ -250,9 +250,6 @@ class SubscribedDomainsProxyView(LoggedAPIView):
     )
     def get(self, request):
         api_key_obj = request.auth
-        if not api_key_obj:
-            return Response({"detail": "No valid API key."}, status=401)
-
         allowed = set(
             api_key_obj.domains.values_list("name", flat=True)
         )  # e.g. {"dtu.dk", ...}
@@ -292,9 +289,6 @@ class StealerLogsByEmailProxyView(LoggedAPIView):
     )
     def get(self, request, email: str = None):
         api_key_obj = request.auth
-        if not api_key_obj:
-            return Response({"detail": "No valid API key."}, status=401)
-
         if not email:
             return Response({"detail": "Missing 'email' parameter."}, status=400)
 
@@ -334,9 +328,6 @@ class StealerLogsByWebsiteDomainProxyView(LoggedAPIView):
     )
     def get(self, request, domain: str = None):
         api_key_obj = request.auth
-        if not api_key_obj:
-            return Response({"detail": "No valid API key."}, status=401)
-
         if not domain:
             return Response({"detail": "Missing 'domain' parameter."}, status=400)
 
@@ -373,9 +364,6 @@ class StealerLogsByEmailDomainProxyView(LoggedAPIView):
     )
     def get(self, request, domain: str = None):
         api_key_obj = request.auth
-        if not api_key_obj:
-            return Response({"detail": "No valid API key."}, status=401)
-
         if not domain:
             return Response({"detail": "Missing 'domain' parameter."}, status=400)
 
@@ -407,6 +395,12 @@ class AllBreachesProxyView(LoggedAPIView):
                 type=openapi.TYPE_BOOLEAN,
                 required=False,
             ),
+            openapi.Parameter(
+                name="hibp-api-key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
         ],
     )
     def get(self, request):
@@ -435,6 +429,12 @@ class SingleBreachProxyView(LoggedAPIView):
                 required=True,
                 description="Breach name, e.g. Adobe",
             ),
+            openapi.Parameter(
+                name="hibp-api-key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
         ],
     )
     def get(self, request, name: str = None):
@@ -445,7 +445,17 @@ class SingleBreachProxyView(LoggedAPIView):
 class LatestBreachProxyView(LoggedAPIView):
     """GET /api/v3/latestbreach"""
 
-    @swagger_auto_schema(operation_description="Proxy to /latestbreach on HIBP.")
+    @swagger_auto_schema(
+        operation_description="Proxy to /latestbreach on HIBP.",
+        manual_parameters=[
+            openapi.Parameter(
+                name="hibp-api-key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
+    )
     def get(self, request):
         resp = hibp_get("latestbreach")
         return make_response(resp)
@@ -454,7 +464,17 @@ class LatestBreachProxyView(LoggedAPIView):
 class DataClassesProxyView(LoggedAPIView):
     """GET /api/v3/dataclasses"""
 
-    @swagger_auto_schema(operation_description="Proxy to /dataclasses on HIBP.")
+    @swagger_auto_schema(
+        operation_description="Proxy to /dataclasses on HIBP.",
+        manual_parameters=[
+            openapi.Parameter(
+                name="hibp-api-key",
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
+    )
     def get(self, request):
         resp = hibp_get("dataclasses")
         return make_response(resp)
@@ -475,8 +495,6 @@ class SubscriptionStatusProxyView(LoggedAPIView):
         ],
     )
     def get(self, request):
-        if not request.auth:
-            return Response({"detail": "No valid API key."}, status=401)
         resp = hibp_get("subscription/status")
         return make_response(resp)
 
