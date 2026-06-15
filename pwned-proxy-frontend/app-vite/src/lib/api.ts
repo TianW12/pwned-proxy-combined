@@ -1,0 +1,30 @@
+// SHA-1 hash of a string, uppercase hex (uses the browser's built-in crypto).
+async function sha1(message: string): Promise<string> {
+  const bytes = new TextEncoder().encode(message);
+  const digest = await crypto.subtle.digest('SHA-1', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+    .toUpperCase();
+}
+
+// Returns how many times a password appears in breaches (0 = not found).
+export async function getPasswordPwnedCount(password: string): Promise<number> {
+  const hash = await sha1(password); // hash in the browser
+  const prefix = hash.slice(0, 5); // only these 5 chars leave the browser
+  const suffix = hash.slice(5);
+
+  const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+    headers: { 'Add-Padding': 'true' },
+  });
+  if (!res.ok) throw new Error('Pwned Passwords request failed');
+
+  const text = await res.text();
+  for (const line of text.split('\n')) {
+    const [hashSuffix, hits] = line.trim().split(':');
+    if (hashSuffix && hashSuffix.toUpperCase() === suffix) {
+      return parseInt(hits, 10); // found it → return the count
+    }
+  }
+  return 0; // not found
+}
