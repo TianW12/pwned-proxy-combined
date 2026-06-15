@@ -41,7 +41,7 @@ export async function getBreachesForEmail(email: string): Promise<Breach[]> {
   const res = await fetch(
     // relative url: send it to the same sever that serves this page - Vite dev server
     // --proxy--adds the key and forwards to the backend, which then forwards to HIBP API.
-    `/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`,
+    `/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false&includeUnverified=true`,
     { headers: { accept: 'application/json' } },
   );
   if (res.status === 404) return []; // 404 = no breaches
