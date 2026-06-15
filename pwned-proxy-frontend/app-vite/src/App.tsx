@@ -3,6 +3,7 @@ import RootLayout from './layouts/RootLayout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import PasswordsPage from './pages/PasswordsPage';
+import EmailPage from './pages/EmailPage';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Route element={<RootLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/passwords" element={<PasswordsPage />} />
+        <Route path="/email" element={<EmailPage />} />
         <Route path="/about" element={<AboutPage />} />
       </Route>
     </Routes>
