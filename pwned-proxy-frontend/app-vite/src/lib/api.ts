@@ -28,3 +28,23 @@ export async function getPasswordPwnedCount(password: string): Promise<number> {
   }
   return 0; // not found
 }
+
+export interface Breach {
+  Name: string;
+  Title: string;
+  Domain: string;
+  BreachDate: string;
+  DataClasses: string[];
+}
+
+export async function getBreachesForEmail(email: string): Promise<Breach[]> {
+  const res = await fetch(
+    // relative url: send it to the same sever that serves this page - Vite dev server
+    // --proxy--adds the key and forwards to the backend, which then forwards to HIBP API.
+    `/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`,
+    { headers: { accept: 'application/json' } },
+  );
+  if (res.status === 404) return []; // 404 = no breaches
+  if (!res.ok) throw new Error(`Backend error ${res.status}`);
+  return (await res.json()) as Breach[];
+}
