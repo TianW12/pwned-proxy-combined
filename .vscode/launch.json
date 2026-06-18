@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Python: Django",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/pwned-proxy-backend/manage.py",
             "args": [
