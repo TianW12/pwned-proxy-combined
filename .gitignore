@@ -17,4 +17,6 @@ node_modules
 .next
 package-lock.json
 
-app/__pycache__/envutils.cpython-313.pyc
+*.pyc
+*__pycache__
+app/db.sqlite3

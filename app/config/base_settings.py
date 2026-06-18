@@ -12,59 +12,20 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-from envutils import ensure_env
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Ensure required environment variables are present. This will load an existing
-# `.env` file if found or create one with generated defaults on first run.
-ensure_env(BASE_DIR)
+load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-
-
-AZURE_AD_TENANT_ID = os.environ.get('PUBLIC_AZURE_AD_TENANT_ID', '')
-AZURE_AD_CLIENT_ID = os.environ.get('AZURE_APP_AIT_SOC_GRAPH_VICRE_REGISTRATION_CLIENT_ID', '')
-
-# The other variables are mostly for your future reference, e.g. if you want to call Graph:
-AZURE_AD_CLIENT_SECRET = os.environ.get('AZURE_APP_AIT_SOC_GRAPH_VICRE_REGISTRATION_CLIENT_SECRET', '')
-AZURE_AD_RESOURCE = os.environ.get('AZURE_APP_AIT_SOC_GRAPH_VICRE_REGISTRATION_RESOURCE', '')
-AZURE_AD_GRANT_TYPE = os.environ.get('AZURE_APP_AIT_SOC_GRAPH_VICRE_REGISTRATION_GRANT_TYPE', '')
-
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
-# Parse DJANGO_DEBUG from environment variables. Defaults to False
-_debug_env = os.environ.get("DJANGO_DEBUG", "false").lower()
-DEBUG = _debug_env in {"1", "true", "yes"}
-
-DOMAIN = os.environ.get(
-    "DOMAIN", "api.haveibeenpwned.security.ait.dtu.dk"
-)
-
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    DOMAIN,
-]
-
-# Allow additional hosts to be configured via environment variables.
-# This supports deployments on services like Coolify that provide the
-# domain through SERVICE_FQDN_APP or a custom DJANGO_ALLOWED_HOSTS
-# variable.
-extra_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
-if extra_hosts:
-    ALLOWED_HOSTS += [h.strip() for h in extra_hosts.split(",") if h.strip()]
-
-service_fqdn = os.environ.get("SERVICE_FQDN_APP")
-if service_fqdn:
-    ALLOWED_HOSTS.append(service_fqdn)
-
+if not SECRET_KEY:
+    raise RuntimeError("Environment variable DJANGO_SECRET_KEY is required")
 
 # Application definition
 INSTALLED_APPS = [
@@ -82,10 +43,8 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "api.authentication.AzureAdJWTAuthentication",  # Bearer tokens first
         "api.authentication.APIKeyAuthentication"       # X-API-Key next
     ],
-    # Possibly other DRF settings...
     "DEFAULT_THROTTLE_CLASSES": [
         "api.throttling.APIKeyRateThrottle"
     ],
@@ -163,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Copenhagen'
 
 USE_I18N = True
 
@@ -182,31 +141,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    # add other domains if necessary
-    f"https://{DOMAIN}",
-    f"http://{DOMAIN}",
-]
-
-CORS_ALLOW_ALL_ORIGINS = True
-
-# When running behind a reverse proxy like Traefik the original protocol is
-# communicated via the `X-Forwarded-Proto` header. Without telling Django to
-# trust this header it will assume all requests are HTTP, causing tools like
-# drf-yasg to generate Swagger/OpenAPI URLs with the wrong scheme. Browsers then
-# block these "mixed content" requests. Configure Django to respect the
-# forwarded header so HTTPS links are generated correctly.
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-USE_X_FORWARDED_HOST = True
-
-# Allow this application to be embedded in an iframe. By default Django
-# sets the X-Frame-Options header to 'DENY' which prevents embedding. Setting
-# it to 'ALLOWALL' removes the header so the site can be framed by any origin.
-X_FRAME_OPTIONS = 'ALLOWALL'
 
 # Hide login and authorize controls in the Swagger UI
 SWAGGER_SETTINGS = {

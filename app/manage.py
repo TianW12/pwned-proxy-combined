@@ -13,7 +13,17 @@ BASE_DIR = Path(__file__).resolve().parent
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE",
+        "config.development_settings"
+    )
+
+
+
+    if 'DJANGO_SETTINGS_MODULE' not in os.environ:
+        raise RuntimeError(
+            'DJANGO_SETTINGS_MODULE environment variable is required'
+        )
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
