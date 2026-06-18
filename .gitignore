@@ -20,3 +20,4 @@ package-lock.json
 *.pyc
 *__pycache__
 app/db.sqlite3
+*venv*
