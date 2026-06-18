@@ -10,6 +10,11 @@ from pathlib import Path
 # where this script is executed.
 BASE_DIR = Path(__file__).resolve().parent
 
+# Add both directories to ``sys.path`` so Django can locate the project
+# packages when invoked from the host or the container environment.
+sys.path.append(str(BASE_DIR))
+sys.path.append(str(BASE_DIR / "app-main"))
+
 
 def main():
     """Run administrative tasks."""
