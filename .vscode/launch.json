@@ -2,22 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Django",
+            "name": "Django: runserver",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/pwned-proxy-backend/manage.py",
+            "program": "${workspaceFolder}/app/manage.py",
             "args": [
                 "runserver",
-                "0.0.0.0:8000"
+                "0.0.0.0:8000",
+                "--settings=config.localhost_debug_true_settings"
             ],
             "django": true,
             "justMyCode": true,
-            "python": "/usr/venv/backend/bin/python",
-            "cwd": "${workspaceFolder}/pwned-proxy-backend",
-            "env": {
-                "DJANGO_DEBUG": "true"
-            }
+            "console": "integratedTerminal"
         }
-        
     ]
 }

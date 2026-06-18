@@ -18,7 +18,7 @@ from .utils import get_hibp_key
 # Helper
 # ---------------------------------------------------------------------
 
-USER_AGENT = "pwned_proxy_app/1.0"
+USER_AGENT = "config_app/1.0"
 
 
 def hibp_get(path: str):

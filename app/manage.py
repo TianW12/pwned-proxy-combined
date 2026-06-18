@@ -6,14 +6,14 @@ from pathlib import Path
 
 # The working directory may be ``app-main`` when running inside Docker.
 # Ensure both the project root and ``app-main`` are on ``sys.path`` so
-# that ``pwned_proxy.settings`` can import ``envutils`` regardless of
+# that ``config.settings`` can import ``envutils`` regardless of
 # where this script is executed.
 BASE_DIR = Path(__file__).resolve().parent
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pwned_proxy.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

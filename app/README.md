@@ -35,7 +35,7 @@ docker compose up --build
 
 The Django application will be available on port **8000**. It accepts
 requests for `localhost`, `api.dtuaitsoc.ngrok.dev` and the domain set via
-`PWNED_PROXY_DOMAIN` (defaulting to `api.haveibeenpwned.security.ait.dtu.dk`).
+`DOMAIN` (defaulting to `api.haveibeenpwned.security.ait.dtu.dk`).
 On first start, migrations are applied and a
 superuser is created automatically. If the `.env` file was generated, all
 generated values including the admin credentials are printed and stored in that
@@ -48,7 +48,7 @@ the `SERVICE_FQDN_APP` environment variable. You can also supply additional
 hosts through `DJANGO_ALLOWED_HOSTS`. These values are automatically appended to
 the Django `ALLOWED_HOSTS` list so the application will accept requests for your
 custom domain. The base domain used by Traefik and Django can be configured via
-`PWNED_PROXY_DOMAIN`.
+`DOMAIN`.
 
 You can then log into the admin interface at
 `http://localhost:8000/admin/` (or via your ngrok domain) using the
@@ -75,7 +75,7 @@ Execute the tests with:
 # Install dependencies if running outside Docker
 pip install -r requirements.txt
 
-PYTHONPATH=app-main DJANGO_SETTINGS_MODULE=pwned_proxy.settings \
+PYTHONPATH=app-main DJANGO_SETTINGS_MODULE=config.settings \
 python manage.py test api
 ```
 
@@ -163,7 +163,7 @@ The container is defined by the root `.devcontainer/docker-compose.yml` and auto
 Use the **ServerLive: localhost_debug_true_settings** launch configuration from `.vscode/launch.json` (press **F5**). This runs:
 
 ```bash
-python manage.py runserver 0.0.0.0:3000 --settings pwned_proxy.localhost_debug_true_settings
+python manage.py runserver 0.0.0.0:3000 --settings config.localhost_debug_true_settings
 ```
 
 `localhost_debug_true_settings.py` enables `DEBUG` and relaxed CORS, so the app is available at <http://localhost:3000/> for interactive debugging.
