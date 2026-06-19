@@ -9,7 +9,7 @@
             "args": [
                 "runserver",
                 "0.0.0.0:8000",
-                "--settings=config.localhost_debug_true_settings"
+                "--settings=config.development_settings"
             ],
             "django": true,
             "justMyCode": true,

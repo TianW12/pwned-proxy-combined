@@ -1,1 +1,1 @@
-tree -Isa 'node_modules|public|data|scripts|.next|.git|staticfiles'
+tree -Isa 'node_modules|public|data|scripts|.next|.git|staticfiles|venv'

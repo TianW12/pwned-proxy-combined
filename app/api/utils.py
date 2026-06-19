@@ -18,7 +18,7 @@ def get_hibp_key() -> str:
     try:
         key = HIBPKey.objects.only("api_key").get().api_key
     except HIBPKey.DoesNotExist:  # pragma: no cover
-        raise RuntimeError("HIBP API key is missing – add it via the admin first.")
+        raise RuntimeError("HIBP API key is missing - add it via the admin first.")
 
     cache.set(cache_key, key, 60 * 60)  # 1 hour
     return key
