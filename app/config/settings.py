@@ -60,7 +60,8 @@ REST_FRAMEWORK = {
         "api.throttling.APIKeyRateThrottle"
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "apikey": "1000/day"
+        "apikey": "1000/day",
+        "forwarded_ip": "100/min",
     }
 }
 

@@ -12,6 +12,8 @@ from urllib.parse import urlencode
 from .models import APIKey, EndpointLog
 from .permissions import HasValidAPIKey
 from .utils import get_hibp_key
+from .throttling import APIKeyRateThrottle, AnonymousForwardedIPRateThrottle
+from rest_framework.permissions import AllowAny
 
 
 # ---------------------------------------------------------------------
@@ -267,8 +269,15 @@ class SubscribedDomainsProxyView(LoggedAPIView):
 
 class StealerLogsByEmailProxyView(LoggedAPIView):
     """
-    GET /api/v3/stealerlogsbyemail/{email}
+    GET /api/v3/stealerlogsbyemailasd/{email}
     """
+
+
+    permission_classes = [AllowAny]
+    throttle_classes = [
+        APIKeyRateThrottle,
+        AnonymousForwardedIPRateThrottle,
+    ]
 
     @swagger_auto_schema(
         operation_description="Proxy to /stealerlogsbyemail/{email} on HIBP.",
@@ -283,12 +292,14 @@ class StealerLogsByEmailProxyView(LoggedAPIView):
                 name="hibp-api-key",
                 in_=openapi.IN_HEADER,
                 type=openapi.TYPE_STRING,
-                required=True,
+                required=False,
             ),
         ],
     )
+
     def get(self, request, email: str = None):
         api_key_obj = request.auth
+
         if not email:
             return Response({"detail": "Missing 'email' parameter."}, status=400)
 
@@ -297,8 +308,9 @@ class StealerLogsByEmailProxyView(LoggedAPIView):
         except ValueError:
             return Response({"detail": "Invalid email format."}, status=400)
 
-        if not api_key_obj.domains.filter(name=email_domain).exists():
-            raise PermissionDenied(f"API key not authorised for '{email_domain}'")
+        if api_key_obj:
+            if not api_key_obj.domains.filter(name=email_domain).exists():
+                raise PermissionDenied(f"API key not authorised for '{email_domain}'")
 
         resp = hibp_get(f"stealerlogsbyemail/{requests.utils.requote_uri(email)}")
         return make_response(resp)
