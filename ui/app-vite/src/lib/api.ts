@@ -37,6 +37,18 @@ export interface Breach {
   DataClasses: string[];
 }
 
+// Returns website domains where the email appeared in stealer logs.
+// 404 = clean 
+export async function getStealerLogsByEmail(email: string): Promise<string[]> {
+  const res = await fetch(
+    `/api/v3/stealerlogsbyemail/${encodeURIComponent(email)}`,
+    { headers: { accept: 'application/json' } },
+  );
+  if (res.status === 404) return [];                 // 404 = records not found, i.e. clean
+  if (!res.ok) throw new Error(`Backend error ${res.status}`);
+  return (await res.json()) as string[];             // array of domains
+}
+
 export async function getBreachesForEmail(email: string): Promise<Breach[]> {
   const res = await fetch(
     // relative url: send it to the same sever that serves this page - Vite dev server

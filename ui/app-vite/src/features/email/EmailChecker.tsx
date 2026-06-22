@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { getBreachesForEmail, type Breach } from '../../lib/api';
+import { getStealerLogsByEmail } from '../../lib/api';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
+
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
 
 export default function EmailChecker() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
-  const [results, setResults] = useState<Breach[]>([]);
+  const [sites, setSites] = useState<string[]>([]);  
   const [error, setError] = useState('');
 
   async function handleCheck() {
@@ -20,14 +22,17 @@ export default function EmailChecker() {
     setError('');
 
     try {
-      const data = await getBreachesForEmail(trimmed);
-      setResults(data);
+      const data = await getStealerLogsByEmail(trimmed);
+      setSites(data);
       setStatus('done');
 
       // confetti when clean
       if (data.length === 0) {
         import('canvas-confetti').then((mod) => {
-          mod.default({ particleCount: 100, spread: 70, origin: { y: 0.7 } });
+          const confetti = mod.default;
+          confetti({ particleCount: 100, spread: 70, origin: { x: 0.5, y: 0.7 } });
+          confetti({ particleCount: 80, spread: 60, angle: 60, origin: { x: 0.1, y: 0.75 }, colors: ['#C7E333', '#A8CC2A', '#22C55E'] });
+          confetti({ particleCount: 80, spread: 60, angle: 120, origin: { x: 0.9, y: 0.75 }, colors: ['#C7E333', '#A8CC2A', '#22C55E'] });
         });
       }
     } catch (err) {
@@ -37,61 +42,58 @@ export default function EmailChecker() {
   }
 
   return (
-    <div>
+    <div className="space-y-8">
       {/* Input row */}
-      <div style={{ display: 'flex', gap: '.5rem', justifyContent: 'center' }}>
+      <div className="flex justify-center">
         <input
           type="email"
-          placeholder="Enter your email"
+          placeholder="Enter the email for check"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
           disabled={status === 'loading'}
+          className="flex-1 p-3 rounded-l-md border border-gray-300 bg-white text-black focus:outline-none"
         />
-        <button onClick={handleCheck} disabled={status === 'loading' || !email}>
+        <button
+          onClick={handleCheck}
+          disabled={status === 'loading' || !email}
+          className="bg-[#C7E333] hover:bg-[#A8CC2A] text-white px-6 rounded-r-md font-semibold disabled:opacity-50"
+        >
           {status === 'loading' ? 'Checking…' : 'Check'}
         </button>
       </div>
 
       {/* Error */}
       {(status === 'error' || error) && (
-        <p style={{ color: 'crimson' }}>{error}</p>
+        <div className="text-red-700 text-center">{error}</div>
       )}
-
-      {/* Results */}
-      {status === 'done' && results.length === 0 && (
-        <p style={{ color: 'green' }}>✅ Good news — no pwnage found!</p>
+      {/* Clean: green card + confetti */}
+      {status === 'done' && sites.length === 0 && (
+         <div className="bg-white/90 border border-green-200 rounded-xl p-6 shadow max-w-md mx-auto text-gray-700">
+          <div className="flex items-center justify-center mb-2">
+            <CheckCircle className="w-6 h-6 text-[#22C55E] mr-2" />
+            <h2 className="text-xl font-bold text-[#22C55E]">Good news — no stealer logs!</h2>
+          </div>
+          <p>This email wasn't found in any stealer logs.</p>
+        </div>
       )}
-
-      {status === 'done' && results.length > 0 && (
-        <div>
-          <p style={{ color: 'crimson' }}>
-            ⚠️ Found in {results.length} breach{results.length > 1 ? 'es' : ''}
-          </p>
-          {results.map((breach) => (
-            <div
-              key={breach.Name}
-              style={{
-                border: '1px solid #ccc',
-                margin: '1rem 0',
-                padding: '1rem',
-                borderRadius: 8,
-              }}
-            >
-              <h3>{breach.Title || breach.Name}</h3>
-              <p>
-                <strong>Domain:</strong> {breach.Domain}
-              </p>
-              <p>
-                <strong>Date:</strong> {breach.BreachDate}
-              </p>
-              {breach.DataClasses.length > 0 && (
-                <p>
-                  <strong>Exposed:</strong> {breach.DataClasses.join(', ')}
-                </p>
-              )}
-            </div>
-          ))}
+      
+      {/* Found: red card listing sites */}
+      {status === 'done' && sites.length > 0 && (
+         <div className="bg-red-100 border border-red-300 rounded-xl p-6 max-w-md mx-auto text-red-700 space-y-3">
+          <div className="flex items-center justify-center mb-2">
+            <AlertTriangle className="w-6 h-6 text-red-600 mr-2" />
+            <h2 className="text-xl font-bold">
+              Found in {sites.length} site{sites.length > 1 ? 's' : ''}!
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {sites.map((domain) => (
+              <span key={domain} className="bg-red-200 border border-red-300 px-3 py-1 rounded-full text-sm">
+                {domain}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

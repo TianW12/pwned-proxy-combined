@@ -44,7 +44,8 @@ export default defineConfig(({ mode }) => {
           // This is the whole point — the key is added here, in Node, so the browser never sees it.
           configure: (proxy) => {
             proxy.on("proxyReq", (proxyReq) => {
-              if (apiKey) proxyReq.setHeader("X-API-Key", apiKey);  // attaches the key
+              // 20260622 requests become anonymous, no X-API-Key header added, even if HIBP_PROXY_API_KEY is set.
+              // if (apiKey) proxyReq.setHeader("X-API-Key", apiKey);  // attaches the key
             });
           },
         },

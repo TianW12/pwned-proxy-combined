@@ -4,9 +4,9 @@ import Footer from '../components/Footer';
 
 export default function RootLayout() {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 to-lime-100">
       <Header />
-      <main style={{ padding: '1rem' }}>
+      <main className="flex-1">
         <Outlet /> {/* the current page gets injected RIGHT HERE */}
       </main>
       <Footer />
