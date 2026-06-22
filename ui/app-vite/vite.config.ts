@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';  
 // process.cwd() and loadEnv are Node-only tools (process doesn't exist in a browser). 
 // So this code can only run in Node — which confirms it's the build side, not the browser side.
 
@@ -30,7 +31,7 @@ export default defineConfig(({ mode }) => {
   const apiKey = env.HIBP_PROXY_API_KEY || "";
 
   return {
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     server: {
       host: true,
       port: 5173,
