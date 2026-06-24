@@ -1,19 +1,28 @@
-# Byte-compiled / optimized / DLL files
-*.env
-*.env.local
-*.old
+# Logs
+logs
 *.log
-*.bak
-.bashrc
-.ssh/
-.vscode-server/
-.gitconfig
-.cache/
-.gnupg/
-.bash_history
-.dotnet/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 node_modules
-.next
-app-main/.env.local
-app-main/package-lock.json
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.env
+*.env.local
+*.env.copy
+
