@@ -3,7 +3,7 @@ from .settings import *  # First pull in all base settings
 DEBUG = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000'
+    'http://localhost:5173'
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 

@@ -15,14 +15,14 @@ with API keys so the proxy works out of the box. On subsequent starts the value 
 `pwned-proxy-backend/.env` is used to update the stored key automatically. The credentials are printed in the backend
 logs.
 
-You can access the frontend at [http://localhost:3000](http://localhost:3000) and the Django admin interface at
+You can access the frontend at [http://localhost:5173](http://localhost:5173) and the Django admin interface at
 [http://localhost:8000/admin/](http://localhost:8000/admin/).
 
 ### Example setup
 
 The following walkthrough demonstrates a complete installation using Docker. It
 assumes `domainthatyouown.com` and `api.domainthatyouown.com` are proxied to
-`localhost:3000` and `localhost:8000` respectively.
+`localhost:5173` and `localhost:8000` respectively.
 
 ### 1. Clone the repository
 
@@ -44,10 +44,7 @@ automatically so you only need to supply your domains and HIBP key afterwards:
 
 ### 3. Configure the frontend
 
-The script copies `pwned-proxy-frontend/app-main/.env.local.example` to
-`pwned-proxy-frontend/app-main/.env.local` and generates a new
-`pwned-proxy-backend/.env`. Edit the generated files to set
-`HIBP_API_KEY` and your domain names.
+Edit the generated `.env` file to set `HIBP_API_KEY` and your domain names.
 
 When running the Docker stack, keep `HIBP_PROXY_INTERNAL_URL` set to
 `http://backend:8000` so the frontend can reach the API container. In the
