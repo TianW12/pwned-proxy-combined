@@ -1,45 +1,50 @@
-# pwned-proxy-frontend
+# Pwned Proxy — Frontend
 
-## Configuration
+React + TypeScript + Vite frontend for the Pwned Proxy project.
 
-Copy `.env.local.example` to `.env.local` and adjust `NEXT_PUBLIC_HIBP_PROXY_URL`
-if you wish to use a different API location. By default it points to
-`http://localhost:8000/`. When deploying publicly over TLS update this to use
-`https://<your-domain>` so Swagger loads the API through HTTPS. This variable is
-read by the start page and the header link so it also works when deployed with
-Coolify.
+Users can check if their email appears in stealer logs or data breaches.
+The frontend calls the local Django backend, which holds the HIBP API key
+and forwards requests to HaveIBeenPwned — the browser never touches the key.
 
-### Proxy API Key
+## Structure
 
-Run the backend “Seed Groups” action and copy the raw key for the *Master Group*
-into `.env.local` as:
-
-```bash
-HIBP_PROXY_API_KEY=<master_key_from_seed>
+```
+ui/
+├── src/
+│   ├── pages/          # Route-level pages (Home, Email, Passwords, About)
+│   ├── features/       # Feature components (EmailChecker, PasswordChecker)
+│   ├── components/     # Shared UI (Header, Footer)
+│   ├── layouts/        # RootLayout wrapping all pages
+│   └── lib/
+│       └── api.ts      # All fetch calls to the backend
+├── vite.config.ts      # Dev server + proxy config (points /api/* to backend)
+└── index.html
 ```
 
-The `/email` page and other server-side routes forward this key as `X-API-Key`
-when talking to the proxy. Without it the page will return `403 Forbidden`.
+## Prerequisites
 
-### Google Analytics
+- Node.js 18+
+- The Django backend running on `http://localhost:8000`
+  → see `../app/README.md` for backend setup
 
-If you want to track visits with Google Analytics you can provide your
-measurement id through an environment variable. Add the variable
-`NEXT_PUBLIC_GA_MEASUREMENT_ID` to `.env.local`:
+## Setup & run
 
-```bash
-NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
-```
-
-Next.js exposes variables prefixed with `NEXT_PUBLIC_` to the browser during
-runtime. When this variable is defined the application will automatically load
-the GA script and start sending page view events. Remember to rebuild the app
-after changing environment variables.
-
-### Contact Email
-
-Set `NEXT_PUBLIC_CONTACT_EMAIL` in `.env.local` to display a contact address on the About page:
+> **Backend must be running first** — see [`../app/README.md`](../app/README.md)
 
 ```bash
-NEXT_PUBLIC_CONTACT_EMAIL=cert@cert.dk
+# Install dependencies (first time only)
+npm install
+
+# Start dev server
+npm run dev
+# → http://localhost:5173
 ```
+
+Vite automatically proxies `/api/*` requests to the backend (configured in `vite.config.ts`).
+
+## Build (production)
+
+```bash
+npm run build   # output goes to dist/
+```
+

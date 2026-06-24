@@ -5,7 +5,55 @@ Django application and a PostgreSQL database. On startup it will apply
 all migrations and create a superuser automatically so you can log in
 immediately.
 
-## Prerequisites
+## Local development (without Docker)
+
+Use this when developing or debugging directly on your machine.
+
+```bash
+# 1. Go to backend folder
+cd app/
+
+# 2. Create virtual environment
+python3 -m venv venv
+
+# 3. Activate it
+source venv/bin/activate          # Linux/Mac
+# venv\Scripts\activate           # Windows
+
+# 4. Install dependencies
+pip install -r requirements.txt
+
+# 5. Create .env from example
+cp .env.dev.example .env
+# Open .env and set:
+#   DJANGO_SECRET_KEY  → any long random string
+#   DJANGO_ALLOWED_HOSTS → localhost
+
+# 6. Create database tables
+python manage.py migrate
+
+# 7. Collect static files (admin CSS, Swagger UI)
+python manage.py collectstatic --no-input
+
+# 8. Create admin user (first time only)
+python manage.py createsuperuser
+
+# 9. Run server
+python manage.py runserver
+# → http://localhost:8000
+```
+
+**Subsequent runs** (venv, DB and admin user already exist):
+```bash
+source venv/bin/activate
+python manage.py runserver
+```
+
+---
+
+## Production (Docker)
+
+### Prerequisites
 
 - [Docker](https://www.docker.com/) and Docker Compose installed
 
