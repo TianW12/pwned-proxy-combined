@@ -45,7 +45,11 @@ export async function getStealerLogsByEmail(email: string): Promise<string[]> {
     { headers: { accept: 'application/json' } },
   );
   if (res.status === 404) return [];                 // 404 = records not found, i.e. clean
-  if (!res.ok) throw new Error(`Backend error ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || body.message || `Backend error ${res.status}`);
+}
+
   return (await res.json()) as string[];             // array of domains
 }
 

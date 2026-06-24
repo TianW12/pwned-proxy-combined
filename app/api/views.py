@@ -311,8 +311,27 @@ class StealerLogsByEmailProxyView(LoggedAPIView):
         if api_key_obj:
             if not api_key_obj.domains.filter(name=email_domain).exists():
                 raise PermissionDenied(f"API key not authorised for '{email_domain}'")
-
+        # Makes the HTTP request to HIBP. The result (status code + body) is stored in resp.
         resp = hibp_get(f"stealerlogsbyemail/{requests.utils.requote_uri(email)}")
+
+        if resp.status_code == 403:
+            # Intercepts HIBP's "forbidden" response before make_response() forwards it, 
+            # to avoid a 403 from HIBP pass straight through to the browser
+            try:
+                # Parses the response body as JSON. resp.json() can return different Python types depending on what HIBP sent
+                body = resp.json()
+                # If the body is a dictionary, it tries to get the "message" key from it. 
+                if isinstance(body, dict):
+                    hibp_message = body.get("message", "Access denied by upstream service.")
+                # If the key doesn't exist, it defaults to a generic message.
+                else:
+                    hibp_message = str(body)   # HIBP returned a plain string
+            except ValueError:
+                # resp.json() raises ValueError if the body isn't valid JSON at all (e.g. empty body, HTML error page). 
+                # This is a last-resort fallback.
+                hibp_message = "Access denied by upstream service."
+            return Response({"detail": hibp_message}, status=403)
+
         return make_response(resp)
 
 
