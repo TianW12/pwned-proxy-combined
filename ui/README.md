@@ -11,7 +11,7 @@ and forwards requests to HaveIBeenPwned — the browser never touches the key.
 ```
 ui/
 ├── src/
-│   ├── pages/          # Route-level pages (Home, Email, Passwords, About)
+│   ├── pages/          # Route-level pages (Email, Passwords)
 │   ├── features/       # Feature components (EmailChecker, PasswordChecker)
 │   ├── components/     # Shared UI (Header, Footer)
 │   ├── layouts/        # RootLayout wrapping all pages
@@ -30,6 +30,12 @@ ui/
 ## Setup & run
 
 > **Backend must be running first** — see [`../app/README.md`](../app/README.md)
+or: 
+```bash
+cd /home/dockeruser/temp/pwned-proxy-combined/app
+source venv/bin/activate
+python manage.py runserver 0.0.0.0:8000
+```
 
 ```bash
 # Install dependencies (first time only)

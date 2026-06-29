@@ -10,9 +10,12 @@ export default function EmailChecker() {
   const [status, setStatus] = useState<Status>('idle');
   const [sites, setSites] = useState<string[]>([]);  
   const [error, setError] = useState('');
-
+  // 4 pieces of state: 
+  // the input value, current status, list of breached domains returned, and any error message.
+  
   async function handleCheck() {
     const trimmed = email.trim();
+    // Basic client-side validation — rejects blank or obviously non-email input.
     if (!trimmed || !trimmed.includes('@')) {
       setError('Enter a valid email address');
       return;
@@ -22,6 +25,8 @@ export default function EmailChecker() {
     setError('');
 
     try {
+      // Calls the API, stores the returned array of domains (e.g. ["gmail.com","facebook.com"]), 
+      // and flips state to done.
       const data = await getStealerLogsByEmail(trimmed);
       setSites(data);
       setStatus('done');

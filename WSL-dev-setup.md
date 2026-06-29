@@ -1,7 +1,6 @@
 # Development Setup (WSL / Debian / Ubuntu)
 
-This guide sets up the full dev environment: Linux (via WSL), the languages the
-project needs (Python for the backend, Node.js for the frontend), and the code.
+This guide sets up the full dev environment: Linux (via WSL), the languages the project needs (Python for the backend, Node.js for the frontend), and the code.
 
 ## 1. Set up WSL (Windows only)
 Run these in **PowerShell**. Skip this section if you're already on Debian/Ubuntu.
