@@ -14,21 +14,38 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-DEBUG = False
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
+# DEBUG must stay OFF in production. Enable it only for local debugging by
+# setting DJANGO_DEBUG=true in the environment / .env file.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
+
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 if not os.environ.get('DJANGO_ALLOWED_HOSTS'):
     raise RuntimeError("Environment variable DJANGO_ALLOWED_HOSTS is required")
 
-DOMAIN = 'localhost:8000'
-os.environ.get('DJANGO_ALLOWED_HOSTS')
-if not os.environ.get('DJANGO_ALLOWED_HOSTS'):
-    raise RuntimeError("Environment variable DJANGO_DOMAIN is required")
+# Public host used to build absolute URLs (e.g. the Swagger schema URL).
+# In production set DJANGO_DOMAIN to your real host, e.g. api.example.com.
+DOMAIN = os.environ.get('DJANGO_DOMAIN', 'localhost:8000')
+
+# When running behind a reverse proxy (nginx) that terminates TLS, the original
+# scheme reaches Django via the X-Forwarded-Proto header. Trust it so Django
+# knows the request arrived over HTTPS and generates correct https:// links
+# (needed for Swagger and admin login to work behind the proxy).
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+# Origins allowed to submit forms / log in to the admin over HTTPS. Django
+# requires the scheme, e.g. https://api.example.com. Provide a comma-separated
+# list via DJANGO_CSRF_TRUSTED_ORIGINS.
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -124,14 +141,6 @@ else:
         }
     }
 
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
